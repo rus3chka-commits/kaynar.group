@@ -1,0 +1,2 @@
+# kaynar.group
+HR заявки 
