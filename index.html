@@ -18,6 +18,7 @@
     --border: #322f29;
     --danger: #ff6b6b;
     --ok: #62c584;
+    --warn: #e8b86d;
   }
   *{ box-sizing: border-box; margin:0; padding:0; }
   [hidden]{ display: none !important; }
@@ -37,7 +38,7 @@
     margin: 0 auto;
     padding: 0 24px;
   }
-  .section{ padding: 70px 0; scroll-margin-top: 78px; }
+  .section{ padding: 56px 0; }
   .section-alt{ background: var(--bg-panel); }
   .eyebrow{
     text-transform: uppercase;
@@ -51,7 +52,7 @@
     font-weight: 700;
     letter-spacing: 0.5px;
   }
-  h1{ font-size: clamp(30px, 4.5vw, 48px); line-height: 1.15; }
+  h1{ font-size: clamp(28px, 4vw, 42px); line-height: 1.15; }
   h2{ font-size: clamp(24px, 3vw, 32px); margin-bottom: 20px; }
   h3{ font-size: 20px; margin-bottom: 10px; }
   p{ color: var(--muted); font-size: 16px; }
@@ -98,6 +99,7 @@
     display:flex;
     align-items:center;
     justify-content: space-between;
+    gap: 16px;
     height: 78px;
   }
   .logo{
@@ -108,6 +110,7 @@
     font-size: 20px;
     letter-spacing: 3px;
     text-transform: uppercase;
+    white-space: nowrap;
   }
   .logo span{
     color: var(--gold);
@@ -123,23 +126,22 @@
   nav a{
     font-size: 14px;
     color: var(--muted);
-    transition: color .2s ease;
+    padding: 8px 0;
+    border-bottom: 2px solid transparent;
+    transition: color .2s ease, border-color .2s ease;
   }
   nav a:hover{ color: var(--gold); }
+  nav a.active{ color: var(--gold); font-weight: 600; border-bottom-color: var(--gold); }
   .nav-cta{ display:flex; align-items:center; gap: 24px; }
 
   /* hero */
   .hero{
-    padding-top: 150px;
-    padding-bottom: 60px;
+    padding-top: 130px;
+    padding-bottom: 50px;
     text-align: center;
   }
   .hero .eyebrow{ display:flex; justify-content:center; }
-  .hero p.lead{
-    max-width: 640px;
-    margin: 20px auto 40px;
-    font-size: 17px;
-  }
+  .hero h1{ margin-bottom: 32px; }
 
   /* stats */
   .stats-grid{
@@ -153,11 +155,11 @@
     background: var(--bg-panel-2);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 24px 20px;
+    padding: 20px;
     text-align:center;
   }
   .stat-card .num{
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 1.1;
     color: var(--gold);
@@ -186,7 +188,7 @@
   .reminder-item.overdue{ border-color: var(--danger); }
   .reminder-item.today{ border-color: var(--gold); }
   .reminder-when{
-    flex: 0 0 170px;
+    flex: 0 0 190px;
     font-size: 14px;
     font-weight: 600;
     color: var(--gold);
@@ -226,6 +228,23 @@
     padding: 12px 16px;
   }
   .toolbar .search:focus{ outline:none; border-color: var(--gold); }
+  .toggle{ display:flex; }
+  .toggle button{
+    background: transparent;
+    border: 1px solid var(--border);
+    border-left-width: 0;
+    color: var(--muted);
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+  .toggle button:first-child{ border-left-width: 1px; border-radius: 2px 0 0 2px; }
+  .toggle button:last-child{ border-radius: 0 2px 2px 0; }
+  .toggle button.on{ background: var(--gold); border-color: var(--gold); color: #131210; }
   .filter-row{
     display:flex;
     align-items:center;
@@ -235,8 +254,16 @@
     min-height: 28px;
   }
   .filter-row .cap{ font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
-  .sync-status{ font-size: 13px; color: #8a8a8a; margin-top: 14px; }
+  .tools-row{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .sync-status{ flex: 1 1 320px; font-size: 13px; color: #8a8a8a; }
   .sync-status.ok{ color: var(--ok); }
+  .sync-status.warn{ color: var(--warn); }
   .sync-status.error{ color: var(--danger); }
 
   /* tags */
@@ -255,6 +282,98 @@
   button.tag.on{ opacity: 1; }
   .tags{ display:flex; flex-wrap:wrap; gap: 6px; }
 
+  /* board */
+  .board{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+  .board-col{
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--col, var(--border));
+    border-radius: 6px;
+    padding: 14px;
+    min-height: 220px;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .board-col.drop{ border-color: var(--col, var(--gold)); background: rgba(239,233,219,0.05); }
+  .col-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 2px 4px 14px;
+  }
+  .col-name{
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--col, var(--gold));
+  }
+  .col-tools{ display:flex; align-items:center; gap: 8px; }
+  .col-name{ overflow-wrap: anywhere; }
+  .col-count{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--bg-panel-2);
+    border-radius: 20px;
+    padding: 1px 10px;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .col-body{ display:flex; flex-direction:column; gap: 10px; }
+  .col-empty{
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: #7a7a7a;
+    font-size: 13px;
+    text-align:center;
+    padding: 24px 12px;
+  }
+  .card{
+    background: var(--bg-panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    cursor: grab;
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .card:hover{ border-color: var(--gold); transform: translateY(-2px); }
+  .card:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+  .card.dragging{ opacity: .4; }
+  .card .title{ font-weight: 600; font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+  .card .sub{ color: var(--muted); font-size: 13px; overflow-wrap: anywhere; font-variant-numeric: lining-nums tabular-nums; }
+  .card .clamp{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card .when{ font-size: 13px; font-weight: 600; color: var(--gold); font-variant-numeric: lining-nums tabular-nums; }
+  .card .when.overdue{ color: var(--danger); }
+  .card .tags{ margin-top: 2px; }
+  .card-foot{ display:flex; align-items:center; justify-content:space-between; gap: 8px; margin-top: 4px; }
+  .card.done{ opacity: .55; }
+  .card.done .title{ text-decoration: line-through; }
+  .col-tools .icon-btn{ font-size: 16px; line-height: 1; padding: 4px 9px; }
+  .board-people .col-name{ letter-spacing: 1px; white-space: nowrap; }
+  /* в «Делах» доска шире, чтобы на большом экране помещались все сотрудники */
+  #view-tasks .section .container{ max-width: 1800px; }
+  /* доска по сотрудникам: столбцов много, листается вбок */
+  .board-people{
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(230px, 1fr);
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+
   /* table */
   .table-wrap{
     overflow-x: auto;
@@ -262,7 +381,7 @@
     border-radius: 6px;
     background: var(--bg-panel-2);
   }
-  table{ width:100%; min-width: 980px; border-collapse: collapse; }
+  table{ width:100%; min-width: 1180px; border-collapse: collapse; }
   th, td{ text-align:left; padding: 14px 16px; vertical-align: top; }
   th{
     font-size: 12px;
@@ -282,12 +401,13 @@
   td .about{
     color: var(--muted);
     font-size: 13px;
-    max-width: 260px;
+    max-width: 240px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  td.nowrap{ white-space: nowrap; }
   td.remind{ white-space: nowrap; }
   td.remind .when{ color: var(--gold); font-weight: 600; }
   td.remind.overdue .when{ color: var(--danger); }
@@ -320,7 +440,7 @@
   dialog::backdrop{ background: rgba(0,0,0,0.7); }
   .dialog-inner{ padding: 36px 36px 32px; }
   .dialog-head{ display:flex; align-items:flex-start; justify-content:space-between; gap: 16px; margin-bottom: 24px; }
-  .dialog-head h2{ margin-bottom: 0; }
+  .dialog-head h2{ margin-bottom: 0; overflow-wrap: anywhere; }
   .close-btn{
     background: transparent;
     border: none;
@@ -330,7 +450,7 @@
     cursor: pointer;
   }
   .close-btn:hover{ color: var(--gold); }
-  .dialog-actions{ display:flex; gap: 12px; align-items:center; margin-top: 8px; }
+  .dialog-actions{ display:flex; gap: 12px; align-items:center; flex-wrap: wrap; margin-top: 8px; }
   .dialog-actions .spacer{ flex: 1 1 auto; }
   .group-title{
     font-size: 13px;
@@ -360,7 +480,8 @@
   }
   .field label .req{ color: var(--gold); }
   .field input,
-  .field textarea{
+  .field textarea,
+  .field select{
     width: 100%;
     background: var(--bg-panel-2);
     border: 1px solid var(--border);
@@ -373,24 +494,37 @@
     color-scheme: dark;
   }
   .field input:focus,
-  .field textarea:focus{
+  .field textarea:focus,
+  .field select:focus{
     outline:none;
     border-color: var(--gold);
   }
   .field textarea{ resize: vertical; min-height: 110px; }
+  .field select{
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23efe9db' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    cursor: pointer;
+  }
+  .field select option{ background: var(--bg-panel-2); color: var(--white); }
   .hint{ font-size: 13px; color: #8a8a8a; margin-top: 6px; }
   .segmented{ display:flex; gap: 0; }
   .segmented label{
     flex: 1 1 0;
     margin: 0;
     text-align:center;
-    padding: 13px 10px;
+    padding: 13px 8px;
     background: var(--bg-panel-2);
     border: 1px solid var(--border);
     border-left-width: 0;
     color: var(--muted);
     cursor: pointer;
     font-size: 14px;
+    text-transform: none;
+    letter-spacing: 0;
     transition: background .2s ease, color .2s ease;
   }
   .segmented label:first-of-type{ border-left-width: 1px; border-radius: 4px 0 0 4px; }
@@ -436,20 +570,29 @@
 
   /* footer */
   footer{
-    padding: 50px 0;
+    padding: 40px 0;
     border-top: 1px solid var(--border);
     text-align:center;
   }
   footer p{ font-size: 13px; color: #7a7a7a; }
 
   @media (max-width: 860px){
-    nav{ display:none; }
-    .stats-grid{ grid-template-columns: 1fr; }
+    .nav-cta{ display:none; }
+    nav ul{ gap: 20px; }
+    .logo{ font-size: 16px; letter-spacing: 2px; }
+    .logo span{ font-size: 11px; letter-spacing: 2px; }
+    .stats-grid{ grid-template-columns: 1fr; gap: 12px; }
     .form-row{ grid-template-columns: 1fr; gap: 0; }
     .reminder-item{ flex-direction: column; align-items: flex-start; gap: 10px; }
     .reminder-when{ flex-basis: auto; }
     .dialog-inner{ padding: 28px 20px 24px; }
-    .nav-cta .btn{ padding: 12px 18px; font-size: 12px; }
+    /* столбцы листаются вбок, как в amoCRM */
+    .board{
+      grid-template-columns: repeat(3, minmax(270px, 1fr));
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .board-people{ grid-template-columns: none; grid-auto-columns: minmax(250px, 1fr); }
   }
 </style>
 </head>
@@ -460,84 +603,134 @@
     <div class="logo">Этно<span>Консалт</span></div>
     <nav>
       <ul>
-        <li><a href="#reminders">Напоминания</a></li>
-        <li><a href="#clients">Клиенты</a></li>
+        <li><a href="#sales" data-nav="sales">Продажи</a></li>
+        <li><a href="#tasks" data-nav="tasks">Дела</a></li>
       </ul>
     </nav>
     <div class="nav-cta">
-      <button type="button" class="btn" data-action="new-client">Добавить клиента</button>
+      <button type="button" class="btn" id="headerAdd">Добавить заявку</button>
     </div>
   </div>
 </header>
 
-<section class="hero">
-  <div class="container">
-    <div class="eyebrow">CRM</div>
-    <h1>Клиенты Этно Консалт</h1>
-    <p class="lead">
-      Записывайте клиентов после первого разговора, ставьте напоминания
-      перезвонить и отмечайте ярлыками, на каком этапе каждый из них.
-    </p>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="num" id="statTotal">0</div>
-        <div class="cap">Клиентов</div>
-      </div>
-      <div class="stat-card">
-        <div class="num" id="statToday">0</div>
-        <div class="cap">Напоминаний сегодня</div>
-      </div>
-      <div class="stat-card" id="statOverdueCard">
-        <div class="num" id="statOverdue">0</div>
-        <div class="cap">Просрочено</div>
+<!-- ================= ПРОДАЖИ ================= -->
+<main id="view-sales">
+  <section class="hero">
+    <div class="container">
+      <div class="eyebrow">Продажи</div>
+      <h1>Заявки Этно Консалт</h1>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="statNew">0</div>
+          <div class="cap">Новых заявок</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statToday">0</div>
+          <div class="cap">Напоминаний сегодня</div>
+        </div>
+        <div class="stat-card" id="statOverdueCard">
+          <div class="num" id="statOverdue">0</div>
+          <div class="cap">Просрочено</div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="section section-alt" id="reminders">
-  <div class="container">
-    <div class="eyebrow">Напоминания</div>
-    <h2>Кому нужно перезвонить</h2>
-    <div class="reminder-list" id="reminderList"></div>
-  </div>
-</section>
+  <section class="section section-alt">
+    <div class="container">
+      <div class="toolbar">
+        <input type="search" class="search" id="search" placeholder="Поиск по имени, нише, ответственному" aria-label="Поиск по заявкам">
+        <div class="toggle" role="group" aria-label="Вид">
+          <button type="button" data-mode="board">Воронка</button>
+          <button type="button" data-mode="list">Список</button>
+        </div>
+        <button type="button" class="btn btn-sm" data-action="new-client">Добавить заявку</button>
+      </div>
+      <div class="filter-row" id="filterRow"></div>
 
-<section class="section" id="clients">
-  <div class="container">
-    <div class="eyebrow">Клиенты</div>
-    <h2>Таблица клиентов</h2>
+      <div class="board" id="salesBoard"></div>
 
-    <div class="toolbar">
-      <input type="search" class="search" id="search" placeholder="Поиск по имени, нише, описанию" aria-label="Поиск">
-      <button type="button" class="btn btn-outline btn-sm" id="exportBtn">Скачать CSV</button>
-      <button type="button" class="btn btn-outline btn-sm" id="settingsBtn">Google Таблица</button>
-      <button type="button" class="btn btn-sm" data-action="new-client">Добавить клиента</button>
+      <div id="salesList" hidden>
+        <div class="table-wrap" id="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Имя</th>
+                <th>Этап</th>
+                <th>Ответственный</th>
+                <th>Ниша</th>
+                <th>Работают</th>
+                <th>О компании</th>
+                <th>Реклама</th>
+                <th>Средний чек</th>
+                <th>Ярлыки</th>
+                <th>Напоминание</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clientRows"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="clientsEmpty" hidden></div>
+      </div>
+
+      <div class="tools-row">
+        <div class="sync-status"></div>
+        <button type="button" class="btn btn-outline btn-sm" id="exportBtn">Скачать CSV</button>
+        <button type="button" class="btn btn-outline btn-sm" data-action="settings">Google Таблица</button>
+      </div>
     </div>
-    <div class="filter-row" id="filterRow"></div>
+  </section>
 
-    <div class="table-wrap" id="tableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Имя</th>
-            <th>Ниша</th>
-            <th>Работают</th>
-            <th>О компании</th>
-            <th>Реклама</th>
-            <th>Средний чек</th>
-            <th>Ярлыки</th>
-            <th>Напоминание</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="clientRows"></tbody>
-      </table>
+  <section class="section">
+    <div class="container">
+      <div class="eyebrow">Напоминания</div>
+      <h2>Кому нужно перезвонить</h2>
+      <div class="reminder-list" id="reminderList"></div>
     </div>
-    <div class="empty" id="clientsEmpty" hidden></div>
-    <div class="sync-status" id="syncStatus"></div>
-  </div>
-</section>
+  </section>
+</main>
+
+<!-- ================= ДЕЛА ================= -->
+<main id="view-tasks" hidden>
+  <section class="hero">
+    <div class="container">
+      <div class="eyebrow">Дела</div>
+      <h1>Задачи команды</h1>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="statTodo">0</div>
+          <div class="cap">К выполнению</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statDoing">0</div>
+          <div class="cap">В работе</div>
+        </div>
+        <div class="stat-card" id="statTaskOverdueCard">
+          <div class="num" id="statTaskOverdue">0</div>
+          <div class="cap">Просрочено</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="toolbar">
+        <input type="search" class="search" id="taskSearch" placeholder="Поиск по задаче, сотруднику, клиенту" aria-label="Поиск по задачам">
+        <button type="button" class="btn btn-sm" data-action="new-task">Добавить задачу</button>
+      </div>
+      <div class="filter-row" id="assigneeRow"></div>
+
+      <div class="board board-people" id="taskBoard"></div>
+
+      <div class="tools-row">
+        <div class="sync-status"></div>
+        <button type="button" class="btn btn-outline btn-sm" data-action="settings">Google Таблица</button>
+      </div>
+    </div>
+  </section>
+</main>
 
 <footer>
   <div class="container">
@@ -545,12 +738,21 @@
   </div>
 </footer>
 
-<!-- Карточка клиента: добавление и редактирование -->
+<!-- Карточка заявки: добавление и редактирование -->
 <dialog id="clientDialog">
   <form id="clientForm" class="dialog-inner" novalidate>
     <div class="dialog-head">
-      <h2 id="clientDialogTitle">Новый клиент</h2>
+      <h2 id="clientDialogTitle">Новая заявка</h2>
       <button type="button" class="close-btn" data-close aria-label="Закрыть">×</button>
+    </div>
+
+    <div class="field">
+      <span class="label" id="stageLabel">Этап</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="stageLabel">
+        <input type="radio" name="stage" id="stage0" value="Заявка" checked><label for="stage0">Заявка</label>
+        <input type="radio" name="stage" id="stage1" value="В работе"><label for="stage1">В работе</label>
+        <input type="radio" name="stage" id="stage2" value="Готово"><label for="stage2">Готово</label>
+      </div>
     </div>
 
     <div class="form-row">
@@ -595,9 +797,15 @@
       </div>
     </div>
 
-    <div class="field">
-      <label for="avgCheck">Средний чек</label>
-      <input type="text" id="avgCheck" name="avgCheck" placeholder="Например: 5 000 сом">
+    <div class="form-row">
+      <div class="field">
+        <label for="avgCheck">Средний чек</label>
+        <input type="text" id="avgCheck" name="avgCheck" placeholder="Например: 5 000 сом">
+      </div>
+      <div class="field">
+        <label for="owner">Ответственный</label>
+        <select id="owner" name="owner"></select>
+      </div>
     </div>
 
     <div class="group-title">Ярлыки</div>
@@ -614,7 +822,7 @@
       <div class="field">
         <label for="remindAt">Когда напомнить</label>
         <input type="datetime-local" id="remindAt" name="remindAt">
-        <div class="quick-row">
+        <div class="quick-row" data-for="remindAt">
           <button type="button" class="icon-btn" data-quick="hour">Через час</button>
           <button type="button" class="icon-btn" data-quick="tomorrow">Завтра в 10:00</button>
           <button type="button" class="icon-btn" data-quick="3days">Через 3 дня</button>
@@ -630,9 +838,68 @@
 
     <div class="dialog-actions">
       <button type="submit" class="btn">Сохранить</button>
-      <button type="button" class="btn btn-outline" data-close>Отмена</button>
+      <button type="button" class="btn btn-outline btn-sm" id="saveAndTaskBtn">Сохранить и поставить задачу</button>
       <span class="spacer"></span>
       <button type="button" class="btn btn-danger btn-sm" id="deleteBtn" hidden>Удалить</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Карточка задачи -->
+<dialog id="taskDialog">
+  <form id="taskForm" class="dialog-inner" novalidate>
+    <div class="dialog-head">
+      <h2 id="taskDialogTitle">Новая задача</h2>
+      <button type="button" class="close-btn" data-close aria-label="Закрыть">×</button>
+    </div>
+
+    <div class="field">
+      <span class="label" id="taskStatusLabel">Статус</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="taskStatusLabel">
+        <input type="radio" name="status" id="status0" value="К выполнению" checked><label for="status0">К выполнению</label>
+        <input type="radio" name="status" id="status1" value="В работе"><label for="status1">В работе</label>
+        <input type="radio" name="status" id="status2" value="Готово"><label for="status2">Готово</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="taskTitle">Что нужно сделать <span class="req">*</span></label>
+      <input type="text" id="taskTitle" name="title" required placeholder="Например: подготовить КП">
+    </div>
+
+    <div class="field">
+      <label for="taskDescription">Подробности</label>
+      <textarea id="taskDescription" name="description" placeholder="Что именно сделать, где взять материалы, какой нужен результат."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="taskAssignee">Ответственный</label>
+        <select id="taskAssignee" name="assignee"></select>
+      </div>
+      <div class="field">
+        <label for="taskClient">Клиент</label>
+        <select id="taskClient" name="clientId"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="taskDue">Срок</label>
+      <input type="datetime-local" id="taskDue" name="due">
+      <div class="quick-row" data-for="taskDue">
+        <button type="button" class="icon-btn" data-quick="today">Сегодня до конца дня</button>
+        <button type="button" class="icon-btn" data-quick="tomorrow">Завтра в 10:00</button>
+        <button type="button" class="icon-btn" data-quick="3days">Через 3 дня</button>
+        <button type="button" class="icon-btn" data-quick="week">Через неделю</button>
+        <button type="button" class="icon-btn" data-quick="clear">Убрать</button>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="submit" class="btn">Сохранить</button>
+      <button type="button" class="btn btn-outline" data-close>Отмена</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-danger btn-sm" id="deleteTaskBtn" hidden>Удалить</button>
     </div>
   </form>
 </dialog>
@@ -645,14 +912,14 @@
       <button type="button" class="close-btn" data-close aria-label="Закрыть">×</button>
     </div>
     <p style="margin-bottom: 24px;">
-      Без подключения клиенты хранятся только в этом браузере. Чтобы они записывались
-      в Google Таблицу и были видны с других устройств, разверните скрипт из файла
-      google-apps-script.js (инструкция внутри файла) и вставьте его адрес сюда.
+      Заявки и задачи записываются в Google Таблицу автоматически: на лист «Клиенты»
+      и на лист «Задачи». Скрипт для таблицы лежит в файле google-apps-script.js,
+      инструкция внутри файла.
     </p>
     <div class="field">
       <label for="scriptUrl">Адрес веб-приложения</label>
       <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <div class="hint">Адрес хранится только в этом браузере. Не передавайте его посторонним: по нему доступна вся база клиентов.</div>
+      <div class="hint">Не передавайте адрес посторонним: по нему доступна вся база.</div>
     </div>
     <div class="dialog-actions">
       <button type="submit" class="btn">Подключить</button>
@@ -670,14 +937,35 @@
   document.getElementById('year').textContent = new Date().getFullYear();
 
   // ==========================================================
-  // Хранилище. Клиенты лежат в localStorage этого браузера.
-  // Если в настройках указан URL Google Apps Script
-  // (см. файл google-apps-script.js), они дублируются в таблицу.
+  // Хранилище. Заявки и задачи лежат в localStorage браузера
+  // и дублируются в Google Таблицу через Apps Script
+  // (см. файл google-apps-script.js). Отдельных кабинетов нет:
+  // все, кто открывает страницу, видят одни и те же данные.
   // ==========================================================
   var STORE_KEY = 'etno_crm_v1';
   // Адрес веб-приложения Google Apps Script: таблица подключена сразу,
   // вставлять его вручную в каждом браузере не нужно.
   var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwjCoMJPZovwClcBfteIUaS-KrwLvYeUVndVweiBSffkEQPblIlHsidMCuIePtKYT6ww/exec';
+
+  // Столбцы досок. Эти же названия пишутся в таблицу.
+  var STAGES = ['Заявка', 'В работе', 'Готово'];
+  var TASK_STATUSES = ['К выполнению', 'В работе', 'Готово'];
+  var COLUMN_COLORS = ['#efe9db', '#6fb1e8', '#62c584'];
+  // Сотрудники: их выбирают ответственными в заявке и в задаче,
+  // у каждого свой столбец в «Делах».
+  // Чтобы добавить или убрать человека, достаточно поменять этот список.
+  var PEOPLE = {
+    'Руслан': '#e8b86d',
+    'Ислам': '#6fb1e8',
+    'Адинай': '#e58fc0',
+    'Нурай': '#c79bf0',
+    'Арууке': '#5fd0c5',
+    'Нежмеддин': '#f0a35e'
+  };
+  var PEOPLE_NAMES = Object.keys(PEOPLE);
+  var UNASSIGNED = 'Не назначено';
+  var UNASSIGNED_COLOR = '#9a958a';
+  var STATUS_COLORS = { 'К выполнению': '#efe9db', 'В работе': '#6fb1e8', 'Готово': '#62c584' };
 
   var PRESET_LABELS = {
     'Горячий': '#ff8f8f',
@@ -689,13 +977,24 @@
   };
   var LABEL_COLORS = ['#e8b86d', '#62c584', '#6fb1e8', '#ff8f8f', '#c79bf0', '#5fd0c5', '#f0a35e', '#e58fc0'];
   var MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-  var FIELDS = ['name', 'contact', 'niche', 'years', 'about', 'adSpend', 'avgCheck', 'remindAt', 'remindText'];
+  var FIELDS = ['name', 'contact', 'niche', 'years', 'about', 'adSpend', 'avgCheck', 'owner', 'remindAt', 'remindText'];
+  var TASK_FIELDS = ['title', 'description', 'assignee', 'due'];
+
+  // Номер правки: по нему видно, менялась ли запись, пока шла отправка
+  var dirtySeq = Date.now();
+  function markDirty(x){ x._dirty = ++dirtySeq; }
 
   var state = loadState();
+  var view = 'sales';
   var editingId = null;
+  var editingTaskId = null;
+  var afterClientSave = '';
   var draftLabels = [];
   var activeFilters = [];
+  var activeStatuses = [];
   var syncError = '';
+  var drag = null;
+  var renderPending = false;
 
   function loadState(){
     var s = null;
@@ -703,13 +1002,19 @@
     s = s || {};
     var clients = Array.isArray(s.clients) ? s.clients : [];
     // Таблицу подключаем впервые: всех, кто уже записан в браузере, нужно в неё отправить
-    if (!s.scriptUrl && !s.syncOff) clients.forEach(function(c){ c._dirty = 1; });
+    if (!s.scriptUrl && !s.syncOff) clients.forEach(markDirty);
     return {
       clients: clients,
+      tasks: Array.isArray(s.tasks) ? s.tasks : [],
       deletes: Array.isArray(s.deletes) ? s.deletes : [],
+      taskDeletes: Array.isArray(s.taskDeletes) ? s.taskDeletes : [],
       notified: s.notified || {},
+      salesMode: s.salesMode === 'list' ? 'list' : 'board',
       syncOff: !!s.syncOff,
-      scriptUrl: s.syncOff ? '' : (s.scriptUrl || DEFAULT_SCRIPT_URL)
+      scriptUrl: s.syncOff ? '' : (s.scriptUrl || DEFAULT_SCRIPT_URL),
+      // Версия скрипта в таблице: первая умеет только клиентов, вторая — ещё этапы
+      // и задачи, третья — ещё ответственного за заявку
+      scriptVersion: s.scriptVersion || 1
     };
   }
   function saveState(){
@@ -746,15 +1051,20 @@
     return day + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
   // 'overdue' | 'today' | 'later' | ''
-  function remindState(c){
-    if (!c.remindAt) return '';
-    var d = new Date(c.remindAt);
+  function whenState(s){
+    if (!s) return '';
+    var d = new Date(s);
     if (isNaN(d)) return '';
     if (d <= new Date()) return 'overdue';
     return dayDiff(d) === 0 ? 'today' : 'later';
   }
+  function remindState(c){ return whenState(c.remindAt); }
+  function stageOf(c){ return STAGES.indexOf(c.stage) !== -1 ? c.stage : STAGES[0]; }
+  function statusOf(t){ return TASK_STATUSES.indexOf(t.status) !== -1 ? t.status : TASK_STATUSES[0]; }
+  function taskOverdue(t){ return statusOf(t) !== TASK_STATUSES[2] && whenState(t.due) === 'overdue'; }
   function labelColor(name){
-    if (PRESET_LABELS[name]) return PRESET_LABELS[name];
+    var fixed = PEOPLE[name] || PRESET_LABELS[name] || STATUS_COLORS[name];
+    if (fixed) return fixed;
     var h = 0;
     for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
     return LABEL_COLORS[h % LABEL_COLORS.length];
@@ -766,15 +1076,25 @@
     if (tagName === 'button') attrs.type = 'button';
     return el(tagName || 'span', attrs);
   }
+  function unique(list){
+    return list.filter(function(l, i){ return l && list.indexOf(l) === i; });
+  }
   function allLabels(extra){
     var list = Object.keys(PRESET_LABELS);
     state.clients.forEach(function(c){ list = list.concat(c.labels || []); });
-    list = list.concat(extra || []);
-    return list.filter(function(l, i){ return l && list.indexOf(l) === i; });
+    return unique(list.concat(extra || []));
   }
-  function findClient(id){
-    for (var i = 0; i < state.clients.length; i++) if (state.clients[i].id === id) return state.clients[i];
+  // Столбец задачи на доске: сотрудник или «Не назначено»
+  function personOf(t){ return PEOPLE[t.assignee] ? t.assignee : UNASSIGNED; }
+  function findById(list, id){
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
     return null;
+  }
+  function findClient(id){ return findById(state.clients, id); }
+  function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function taskClientName(t){
+    var c = t.clientId ? findClient(t.clientId) : null;
+    return c ? c.name : (t.clientName || '');
   }
   function toast(title, text, onClick){
     var t = el('div', { 'class': 'toast', role: 'status' }, [
@@ -785,27 +1105,119 @@
     $('toasts').appendChild(t);
     setTimeout(function(){ t.remove(); }, 15000);
   }
+  // Кнопки-фильтры: ярлыки в продажах, исполнители в делах
+  function renderChips(row, caption, names, active, onChange){
+    row.textContent = '';
+    row.hidden = !names.length;
+    row.appendChild(el('span', { 'class': 'cap', text: caption }));
+    names.forEach(function(name){
+      var on = active.indexOf(name) !== -1;
+      row.appendChild(tagEl(name, 'button', {
+        'class': 'tag' + (on ? ' on' : ''),
+        'aria-pressed': String(on),
+        onclick: function(){
+          var i = active.indexOf(name);
+          if (i === -1) active.push(name); else active.splice(i, 1);
+          onChange();
+        }
+      }));
+    });
+  }
+
+  // ---------- доска со столбцами ----------
+  function endDrag(){
+    drag = null;
+    var moving = document.querySelector('.card.dragging');
+    if (moving) moving.classList.remove('dragging');
+    Array.prototype.forEach.call(document.querySelectorAll('.board-col.drop'), function(c){ c.classList.remove('drop'); });
+    if (renderPending) { renderPending = false; render(); }
+  }
+  function cardEl(box, id, children, onOpen){
+    var card = el('div', { 'class': 'card', draggable: 'true', tabindex: '0', role: 'button' }, children);
+    card.addEventListener('click', onOpen);
+    card.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(); }
+    });
+    card.addEventListener('dragstart', function(e){
+      drag = { box: box, id: id };
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', id);
+      setTimeout(function(){ if (drag) card.classList.add('dragging'); }, 0);
+    });
+    card.addEventListener('dragend', endDrag);
+    return card;
+  }
+  function renderBoard(box, columns, colors, items, columnOf, toCard, onMove, emptyText, onAdd){
+    box.textContent = '';
+    columns.forEach(function(name, i){
+      var own = items.filter(function(x){ return columnOf(x) === name; });
+      var body = el('div', { 'class': 'col-body' }, own.map(toCard));
+      if (!own.length) {
+        body.appendChild(el('div', { 'class': 'col-empty', text: i === 0 && !items.length ? emptyText : 'Перетащите карточку сюда' }));
+      }
+      var col = el('div', { 'class': 'board-col', style: '--col:' + colors[i] }, [
+        el('div', { 'class': 'col-head' }, [
+          el('span', { 'class': 'col-name', text: name }),
+          el('span', { 'class': 'col-tools' }, [
+            el('span', { 'class': 'col-count', text: String(own.length) }),
+            onAdd ? el('button', { type: 'button', 'class': 'icon-btn', text: '+', title: 'Добавить задачу', 'aria-label': 'Добавить задачу: ' + name, onclick: function(){ onAdd(name); } }) : null
+          ])
+        ]),
+        body
+      ]);
+      col.addEventListener('dragover', function(e){
+        if (!drag || drag.box !== box) return;
+        e.preventDefault();
+        col.classList.add('drop');
+      });
+      col.addEventListener('dragleave', function(e){
+        if (!col.contains(e.relatedTarget)) col.classList.remove('drop');
+      });
+      col.addEventListener('drop', function(e){
+        e.preventDefault();
+        var d = drag;
+        endDrag();
+        if (d && d.box === box) onMove(d.id, name);
+      });
+      box.appendChild(col);
+    });
+  }
 
   // ---------- render ----------
   function render(){
+    // Пока карточку тащат, доску не перерисовываем
+    if (drag) { renderPending = true; return; }
     renderStats();
-    renderReminders();
     renderFilters();
-    renderTable();
+    renderSales();
+    renderReminders();
+    renderTasks();
     renderSyncStatus();
   }
 
   function renderStats(){
-    var today = 0, overdue = 0;
+    var fresh = 0, today = 0, overdue = 0;
     state.clients.forEach(function(c){
+      if (stageOf(c) === STAGES[0]) fresh++;
       var s = remindState(c);
       if (s === 'overdue') overdue++;
       else if (s === 'today') today++;
     });
-    $('statTotal').textContent = state.clients.length;
+    $('statNew').textContent = fresh;
     $('statToday').textContent = today;
     $('statOverdue').textContent = overdue;
     $('statOverdueCard').classList.toggle('alert', overdue > 0);
+
+    var todo = 0, doing = 0, late = 0;
+    state.tasks.forEach(function(t){
+      if (statusOf(t) === TASK_STATUSES[0]) todo++;
+      else if (statusOf(t) === TASK_STATUSES[1]) doing++;
+      if (taskOverdue(t)) late++;
+    });
+    $('statTodo').textContent = todo;
+    $('statDoing').textContent = doing;
+    $('statTaskOverdue').textContent = late;
+    $('statTaskOverdueCard').classList.toggle('alert', late > 0);
   }
 
   function renderReminders(){
@@ -814,7 +1226,7 @@
     var items = state.clients.filter(function(c){ return remindState(c); })
       .sort(function(a, b){ return a.remindAt < b.remindAt ? -1 : a.remindAt > b.remindAt ? 1 : 0; });
     if (!items.length) {
-      list.appendChild(el('div', { 'class': 'empty', text: 'Напоминаний нет. Откройте клиента в таблице и выберите, когда ему перезвонить.' }));
+      list.appendChild(el('div', { 'class': 'empty', text: 'Напоминаний нет. Откройте заявку и выберите, когда перезвонить клиенту.' }));
       return;
     }
     items.forEach(function(c){
@@ -834,24 +1246,11 @@
   }
 
   function renderFilters(){
-    var row = $('filterRow');
-    row.textContent = '';
     var labels = allLabels();
     activeFilters = activeFilters.filter(function(l){ return labels.indexOf(l) !== -1; });
-    row.appendChild(el('span', { 'class': 'cap', text: 'Ярлыки:' }));
-    labels.forEach(function(name){
-      var on = activeFilters.indexOf(name) !== -1;
-      row.appendChild(tagEl(name, 'button', {
-        'class': 'tag' + (on ? ' on' : ''),
-        'aria-pressed': String(on),
-        onclick: function(){
-          var i = activeFilters.indexOf(name);
-          if (i === -1) activeFilters.push(name); else activeFilters.splice(i, 1);
-          renderFilters();
-          renderTable();
-        }
-      }));
-    });
+    renderChips($('filterRow'), 'Ярлыки:', labels, activeFilters, function(){ renderFilters(); renderSales(); });
+
+    renderChips($('assigneeRow'), 'Статус:', TASK_STATUSES, activeStatuses, function(){ renderFilters(); renderTasks(); });
   }
 
   function visibleClients(){
@@ -860,8 +1259,51 @@
       var okLabels = activeFilters.every(function(l){ return (c.labels || []).indexOf(l) !== -1; });
       if (!okLabels) return false;
       if (!q) return true;
-      return [c.name, c.contact, c.niche, c.about, (c.labels || []).join(' ')].join(' ').toLowerCase().indexOf(q) !== -1;
+      return [c.name, c.contact, c.niche, c.about, c.owner, (c.labels || []).join(' ')].join(' ').toLowerCase().indexOf(q) !== -1;
     }).sort(function(a, b){ return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1; });
+  }
+
+  function renderSales(){
+    var board = state.salesMode === 'board';
+    $('salesBoard').hidden = !board;
+    $('salesList').hidden = board;
+    Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function(b){
+      var on = b.getAttribute('data-mode') === state.salesMode;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    if (board) renderSalesBoard(); else renderTable();
+  }
+
+  function renderSalesBoard(){
+    var box = $('salesBoard');
+    renderBoard(box, STAGES, COLUMN_COLORS, visibleClients(), stageOf, function(c){
+      var s = remindState(c);
+      return cardEl(box, c.id, [
+        el('div', { 'class': 'title', text: c.name }),
+        c.niche ? el('div', { 'class': 'sub', text: c.niche + (c.years ? ' · ' + c.years : '') }) : null,
+        c.avgCheck ? el('div', { 'class': 'sub', text: 'Средний чек: ' + c.avgCheck }) : null,
+        c.contact ? el('div', { 'class': 'sub', text: c.contact }) : null,
+        c.owner ? el('div', { 'class': 'sub', text: 'Ответственный: ' + c.owner }) : null,
+        s ? el('div', { 'class': 'when ' + s, text: formatWhen(c.remindAt) + ' · ' + (c.remindText || 'Перезвонить') }) : null,
+        (c.labels || []).length ? el('div', { 'class': 'tags' }, c.labels.map(function(l){ return tagEl(l); })) : null
+      ], function(){ openClient(c.id); });
+    }, moveClient, state.clients.length ? 'По этому запросу никого не нашлось' : 'Заявок пока нет. Нажмите «Добавить заявку».');
+  }
+
+  function moveClient(id, stage){
+    var c = findClient(id);
+    if (!c || stageOf(c) === stage) return;
+    c.stage = stage;
+    touch(c);
+  }
+  // Запись изменилась: сохранить, перерисовать, отправить в таблицу
+  function touch(x){
+    x.updatedAt = toLocalInput(new Date());
+    markDirty(x);
+    saveState();
+    render();
+    pushChanges();
   }
 
   function renderTable(){
@@ -874,7 +1316,7 @@
     if (!list.length) {
       empty.textContent = state.clients.length
         ? 'По этому запросу никого не нашлось.'
-        : 'Пока нет ни одного клиента. Нажмите «Добавить клиента», чтобы записать первого.';
+        : 'Заявок пока нет. Нажмите «Добавить заявку», чтобы записать первую.';
       return;
     }
     list.forEach(function(c){
@@ -885,10 +1327,12 @@
           el('div', { 'class': 'name', text: c.name }),
           c.contact ? el('div', { 'class': 'sub', text: c.contact }) : null
         ]),
+        el('td', { 'class': 'nowrap', text: stageOf(c), style: 'color:' + COLUMN_COLORS[STAGES.indexOf(stageOf(c))] + ';font-weight:600;' }),
+        el('td', { 'class': 'nowrap', text: c.owner || '—' }),
         el('td', { text: c.niche || '—' }),
         el('td', { text: c.years || '—' }),
         el('td', null, [ el('div', { 'class': 'about', text: c.about || '—', title: c.about || '' }) ]),
-        el('td', { style: 'white-space:nowrap;' }, [
+        el('td', { 'class': 'nowrap' }, [
           el('div', { text: ads }),
           c.adsRun !== 'Нет' && c.adSpend ? el('div', { 'class': 'sub', text: c.adSpend }) : null
         ]),
@@ -910,38 +1354,139 @@
     });
   }
 
-  function renderSyncStatus(){
-    var node = $('syncStatus');
-    var pending = state.deletes.length + state.clients.filter(function(c){ return c._dirty; }).length;
-    if (!state.scriptUrl) {
-      node.className = 'sync-status';
-      node.textContent = 'Данные хранятся только в этом браузере. Подключите Google Таблицу, чтобы не потерять их.';
-    } else if (syncError) {
-      node.className = 'sync-status error';
-      node.textContent = 'Google Таблица недоступна: ' + syncError + '. Не отправлено изменений: ' + pending + '. Они сохранены в браузере и уйдут при следующей синхронизации.';
-    } else if (pending) {
-      node.className = 'sync-status';
-      node.textContent = 'Отправка в Google Таблицу...';
-    } else {
-      node.className = 'sync-status ok';
-      node.textContent = 'Все изменения записаны в Google Таблицу.';
-    }
+  function visibleTasks(){
+    var q = $('taskSearch').value.trim().toLowerCase();
+    var done = TASK_STATUSES[2];
+    return state.tasks.filter(function(t){
+      if (activeStatuses.length && activeStatuses.indexOf(statusOf(t)) === -1) return false;
+      if (!q) return true;
+      return [t.title, t.description, t.assignee, taskClientName(t)].join(' ').toLowerCase().indexOf(q) !== -1;
+    }).sort(function(a, b){
+      // Готовые внизу; дальше задачи со сроком, ближайшие сверху
+      if ((statusOf(a) === done) !== (statusOf(b) === done)) return statusOf(a) === done ? 1 : -1;
+      if (!!a.due !== !!b.due) return a.due ? -1 : 1;
+      if (a.due !== b.due) return a.due < b.due ? -1 : 1;
+      return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1;
+    });
   }
 
-  // ---------- client dialog ----------
+  // Доска задач: столбец на каждого сотрудника, перетаскивание меняет исполнителя
+  function renderTasks(){
+    var box = $('taskBoard');
+    var columns = [UNASSIGNED].concat(PEOPLE_NAMES);
+    var colors = [UNASSIGNED_COLOR].concat(PEOPLE_NAMES.map(function(n){ return PEOPLE[n]; }));
+    renderBoard(box, columns, colors, visibleTasks(), personOf, function(t){
+      var client = taskClientName(t);
+      var due = whenState(t.due);
+      var status = statusOf(t);
+      var done = status === TASK_STATUSES[2];
+      var card = cardEl(box, t.id, [
+        el('div', { 'class': 'title', text: t.title }),
+        t.description ? el('div', { 'class': 'sub clamp', text: t.description }) : null,
+        client ? el('div', { 'class': 'sub', text: 'Клиент: ' + client }) : null,
+        // Ответственный, которого нет в списке сотрудников (например, вписан в таблице вручную)
+        t.assignee && !PEOPLE[t.assignee] ? el('div', { 'class': 'sub', text: 'Ответственный: ' + t.assignee }) : null,
+        due ? el('div', { 'class': 'when' + (taskOverdue(t) ? ' overdue' : ''), text: (taskOverdue(t) ? 'Просрочено: ' : 'Срок: ') + formatWhen(t.due) }) : null,
+        el('div', { 'class': 'card-foot' }, [
+          tagEl(status),
+          done ? null : el('button', { type: 'button', 'class': 'icon-btn', text: 'Готово', onclick: function(e){
+            e.stopPropagation();
+            t.status = TASK_STATUSES[2];
+            touch(t);
+          } })
+        ])
+      ], function(){ openTask(t.id); });
+      if (done) card.classList.add('done');
+      return card;
+    }, moveTask, state.tasks.length ? 'По этому запросу ничего не нашлось' : 'Задач пока нет. Нажмите «Добавить задачу».', function(person){
+      openTask(null, null, person === UNASSIGNED ? '' : person);
+    });
+  }
+
+  function moveTask(id, person){
+    var t = findById(state.tasks, id);
+    if (!t || personOf(t) === person) return;
+    t.assignee = person === UNASSIGNED ? '' : person;
+    touch(t);
+  }
+
+  function renderSyncStatus(){
+    var v2 = state.scriptVersion >= 2;
+    var pending = state.deletes.length + state.clients.filter(function(c){ return c._dirty; }).length;
+    if (v2) pending += state.taskDeletes.length + state.tasks.filter(function(t){ return t._dirty; }).length;
+    var cls = 'sync-status', text;
+    if (!state.scriptUrl) {
+      text = 'Данные хранятся только в этом браузере. Подключите Google Таблицу, чтобы не потерять их.';
+    } else if (syncError) {
+      cls += ' error';
+      text = 'Google Таблица недоступна: ' + syncError + '. Не отправлено изменений: ' + pending + '. Они сохранены в браузере и уйдут при следующей синхронизации.';
+    } else if (pending) {
+      text = 'Отправка в Google Таблицу...';
+    } else if (state.scriptVersion < 3) {
+      cls += ' warn';
+      text = 'Заявки записываются в Google Таблицу, но ' + (v2 ? 'ответственные за заявки' : 'этапы воронки, ответственные и задачи') +
+        ' пока хранятся только в этом браузере. Чтобы их видели все, обновите скрипт в таблице: инструкция в начале файла google-apps-script.js.';
+    } else {
+      cls += ' ok';
+      text = 'Все изменения записаны в Google Таблицу.';
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.sync-status'), function(node){
+      node.className = cls;
+      node.textContent = text;
+    });
+  }
+
+  // ---------- разделы ----------
+  function setView(next){
+    view = next === 'tasks' ? 'tasks' : 'sales';
+    $('view-sales').hidden = view !== 'sales';
+    $('view-tasks').hidden = view !== 'tasks';
+    $('headerAdd').textContent = view === 'tasks' ? 'Добавить задачу' : 'Добавить заявку';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-nav]'), function(a){
+      var on = a.getAttribute('data-nav') === view;
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+  }
+  window.addEventListener('hashchange', function(){
+    setView(location.hash.slice(1));
+    window.scrollTo(0, 0);
+  });
+  $('headerAdd').addEventListener('click', function(){
+    if (view === 'tasks') openTask(null); else openClient(null);
+  });
+
+  // ---------- карточка заявки ----------
   var clientDialog = $('clientDialog');
   var clientForm = $('clientForm');
+
+  // Список сотрудников для выбора ответственного. Имя, которого нет в списке
+  // (например, вписано в таблице вручную), оставляем отдельным пунктом.
+  function fillPeople(select, current){
+    select.textContent = '';
+    select.appendChild(el('option', { value: '', text: UNASSIGNED }));
+    PEOPLE_NAMES.concat(current && !PEOPLE[current] ? [current] : []).forEach(function(name){
+      select.appendChild(el('option', { value: name, text: name }));
+    });
+  }
+
+  function checkRadio(form, name, value){
+    Array.prototype.forEach.call(form.querySelectorAll('input[name="' + name + '"]'), function(r){
+      if (r.value === value) r.checked = true;
+    });
+  }
 
   function openClient(id, focusReminder){
     var c = id ? findClient(id) : null;
     editingId = c ? c.id : null;
     clientForm.reset();
-    $('clientDialogTitle').textContent = c ? c.name : 'Новый клиент';
+    $('clientDialogTitle').textContent = c ? c.name : 'Новая заявка';
     $('deleteBtn').hidden = !c;
+    fillPeople($('owner'), c ? c.owner : '');
     if (c) {
       FIELDS.forEach(function(f){ clientForm.elements[f].value = c[f] || ''; });
-      var radio = clientForm.querySelector('input[name="adsRun"][value="' + (c.adsRun || '') + '"]');
-      if (radio) radio.checked = true;
+      checkRadio(clientForm, 'adsRun', c.adsRun || '');
+      checkRadio(clientForm, 'stage', stageOf(c));
     }
     draftLabels = c ? (c.labels || []).slice() : [];
     renderLabelPicker();
@@ -989,17 +1534,26 @@
     if (e.target.name === 'adsRun') toggleAdSpend();
   });
 
-  clientForm.addEventListener('click', function(e){
+  // Быстрый выбор даты в напоминании и в сроке задачи
+  document.addEventListener('click', function(e){
     var quick = e.target.getAttribute && e.target.getAttribute('data-quick');
     if (!quick) return;
+    var input = $(e.target.parentNode.getAttribute('data-for'));
     var d = new Date();
-    if (quick === 'clear') { $('remindAt').value = ''; return; }
+    if (quick === 'clear') { input.value = ''; return; }
     if (quick === 'hour') d.setHours(d.getHours() + 1);
+    else if (quick === 'today') d.setHours(23, 59, 0, 0);
     else {
       d.setDate(d.getDate() + (quick === 'tomorrow' ? 1 : quick === '3days' ? 3 : 7));
       d.setHours(10, 0, 0, 0);
     }
-    $('remindAt').value = toLocalInput(d);
+    input.value = toLocalInput(d);
+  });
+
+  $('saveAndTaskBtn').addEventListener('click', function(){
+    afterClientSave = 'task';
+    clientForm.requestSubmit();
+    afterClientSave = '';
   });
 
   clientForm.addEventListener('submit', function(e){
@@ -1009,31 +1563,29 @@
       return;
     }
     addDraftLabel();
-    var now = toLocalInput(new Date());
     var c = editingId ? findClient(editingId) : null;
     if (!c) {
-      c = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), createdAt: now };
+      c = { id: newId(), createdAt: toLocalInput(new Date()) };
       state.clients.push(c);
     }
     FIELDS.forEach(function(f){ c[f] = clientForm.elements[f].value.trim(); });
     c.adsRun = clientForm.elements.adsRun.value;
+    c.stage = clientForm.elements.stage.value;
     if (c.adsRun === 'Нет') c.adSpend = '';
     if (!c.remindAt) c.remindText = '';
     c.labels = draftLabels.slice();
-    c.updatedAt = now;
-    markDirty(c);
-    saveState();
+    var next = afterClientSave;
     clientDialog.close();
-    render();
-    pushChanges();
+    touch(c);
     if (c.remindAt && 'Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
+    if (next === 'task') openTask(null, c.id, c.owner);
   });
 
   $('deleteBtn').addEventListener('click', function(){
     var c = findClient(editingId);
-    if (!c || !confirm('Удалить клиента «' + c.name + '»? Вернуть его будет нельзя.')) return;
+    if (!c || !confirm('Удалить заявку «' + c.name + '»? Вернуть её будет нельзя.')) return;
     state.clients = state.clients.filter(function(x){ return x.id !== c.id; });
     state.deletes.push(c.id);
     saveState();
@@ -1047,12 +1599,72 @@
     if (!c) return;
     c.remindAt = '';
     c.remindText = '';
-    c.updatedAt = toLocalInput(new Date());
-    markDirty(c);
+    touch(c);
+  }
+
+  // ---------- карточка задачи ----------
+  var taskDialog = $('taskDialog');
+  var taskForm = $('taskForm');
+
+  function openTask(id, clientId, person){
+    var t = id ? findById(state.tasks, id) : null;
+    editingTaskId = t ? t.id : null;
+    taskForm.reset();
+    $('taskDialogTitle').textContent = t ? t.title : 'Новая задача';
+    $('deleteTaskBtn').hidden = !t;
+
+    var people = $('taskAssignee');
+    fillPeople(people, t ? t.assignee : '');
+
+    var select = $('taskClient');
+    select.textContent = '';
+    select.appendChild(el('option', { value: '', text: 'Без клиента' }));
+    state.clients.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'ru'); }).forEach(function(c){
+      select.appendChild(el('option', { value: c.id, text: c.name + (c.niche ? ' · ' + c.niche : '') }));
+    });
+
+    if (t) {
+      TASK_FIELDS.forEach(function(f){ taskForm.elements[f].value = t[f] || ''; });
+      checkRadio(taskForm, 'status', statusOf(t));
+    }
+    var linked = t ? t.clientId : clientId;
+    select.value = linked && findClient(linked) ? linked : '';
+    if (!t && person) people.value = person;
+    taskDialog.showModal();
+    taskDialog.scrollTop = 0;
+    $('taskTitle').focus();
+  }
+
+  taskForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!taskForm.checkValidity()) {
+      taskForm.reportValidity();
+      return;
+    }
+    var t = editingTaskId ? findById(state.tasks, editingTaskId) : null;
+    if (!t) {
+      t = { id: newId(), createdAt: toLocalInput(new Date()) };
+      state.tasks.push(t);
+    }
+    TASK_FIELDS.forEach(function(f){ t[f] = taskForm.elements[f].value.trim(); });
+    t.status = taskForm.elements.status.value;
+    t.clientId = $('taskClient').value;
+    // Имя клиента дублируем, чтобы в Google Таблице задача читалась без CRM
+    t.clientName = t.clientId ? findClient(t.clientId).name : '';
+    taskDialog.close();
+    touch(t);
+  });
+
+  $('deleteTaskBtn').addEventListener('click', function(){
+    var t = findById(state.tasks, editingTaskId);
+    if (!t || !confirm('Удалить задачу «' + t.title + '»? Вернуть её будет нельзя.')) return;
+    state.tasks = state.tasks.filter(function(x){ return x.id !== t.id; });
+    state.taskDeletes.push(t.id);
     saveState();
+    taskDialog.close();
     render();
     pushChanges();
-  }
+  });
 
   // Звук напоминания. Браузер разрешает звук только после первого клика
   // или нажатия клавиши на странице, поэтому включаем его по этому событию.
@@ -1100,9 +1712,7 @@
       }
     });
     if (changed) { saveState(); playChime(); }
-    renderStats();
-    renderReminders();
-    renderTable();
+    render();
   }
 
   // ---------- Google Таблица ----------
@@ -1114,29 +1724,53 @@
         return j;
       });
   }
-  function toRemote(c){
+  function toRemote(x){
     var o = {};
-    Object.keys(c).forEach(function(k){ if (k.charAt(0) !== '_') o[k] = c[k]; });
+    Object.keys(x).forEach(function(k){ if (k.charAt(0) !== '_') o[k] = x[k]; });
     return o;
+  }
+  function dirtyOf(list){ return list.filter(function(x){ return x._dirty; }); }
+  function clearSent(list, sent){
+    list.forEach(function(x, i){ if (x._dirty === sent[i]) delete x._dirty; });
+  }
+  // Запоминает версию скрипта. Возвращает true, если скрипт только что обновили
+  // и теперь нужно отправить то, что старая версия не принимала.
+  function noteVersion(j){
+    var v = j.version || 1;
+    var upgraded = v > state.scriptVersion;
+    if (upgraded) {
+      state.clients.forEach(function(c){ if (stageOf(c) !== STAGES[0] || c.owner) markDirty(c); });
+    }
+    state.scriptVersion = v;
+    return upgraded;
   }
 
   var syncing = null;
   var pushCount = 0;
-  var dirtySeq = Date.now();
-  // Номер правки: по нему видно, менялся ли клиент, пока шла отправка
-  function markDirty(c){ c._dirty = ++dirtySeq; }
   function pushChanges(){
     if (!state.scriptUrl) return Promise.resolve();
     if (syncing) return syncing.then(pushChanges);
-    var dirty = state.clients.filter(function(c){ return c._dirty; });
+    var v2 = state.scriptVersion >= 2;
+    var clients = dirtyOf(state.clients);
+    var tasks = v2 ? dirtyOf(state.tasks) : [];
     var deletes = state.deletes.slice();
-    if (!dirty.length && !deletes.length) return Promise.resolve();
-    var sent = dirty.map(function(c){ return c._dirty; });
+    var taskDeletes = v2 ? state.taskDeletes.slice() : [];
+    if (!clients.length && !tasks.length && !deletes.length && !taskDeletes.length) return Promise.resolve();
+    var sentClients = clients.map(function(c){ return c._dirty; });
+    var sentTasks = tasks.map(function(t){ return t._dirty; });
+    var again = false;
     pushCount++;
-    syncing = api({ action: 'save', clients: dirty.map(toRemote), deletes: deletes })
-      .then(function(){
-        dirty.forEach(function(c, i){ if (c._dirty === sent[i]) delete c._dirty; });
+    syncing = api({
+      action: 'save',
+      clients: clients.map(toRemote), deletes: deletes,
+      tasks: tasks.map(toRemote), taskDeletes: taskDeletes
+    })
+      .then(function(j){
+        clearSent(clients, sentClients);
+        clearSent(tasks, sentTasks);
         state.deletes = state.deletes.filter(function(id){ return deletes.indexOf(id) === -1; });
+        state.taskDeletes = state.taskDeletes.filter(function(id){ return taskDeletes.indexOf(id) === -1; });
+        again = noteVersion(j);
         syncError = '';
       })
       .catch(function(err){ syncError = err.message || 'нет соединения'; })
@@ -1144,9 +1778,19 @@
         syncing = null;
         saveState();
         renderSyncStatus();
+        if (again) return pushChanges();
       });
     renderSyncStatus();
     return syncing;
+  }
+
+  // Свои несохранённые правки важнее того, что пришло из таблицы
+  function mergeRemote(remote, local, deletes){
+    var mine = dirtyOf(local);
+    var mineIds = mine.map(function(x){ return x.id; });
+    return (remote || []).filter(function(x){
+      return x.id && mineIds.indexOf(x.id) === -1 && deletes.indexOf(x.id) === -1;
+    }).concat(mine);
   }
 
   // Сначала отправляем свои изменения, потом забираем таблицу целиком
@@ -1160,15 +1804,22 @@
     }).then(function(j){
       // Пока таблица читалась, ушла новая правка: этот список уже устарел
       if (seen !== pushCount) return;
-      var local = state.clients.filter(function(c){ return c._dirty; });
-      var localIds = local.map(function(c){ return c.id; });
-      var remote = (j.clients || []).filter(function(c){
-        return c.id && localIds.indexOf(c.id) === -1 && state.deletes.indexOf(c.id) === -1;
+      var upgraded = noteVersion(j);
+      var before = {};
+      state.clients.forEach(function(c){ before[c.id] = c; });
+      state.clients = mergeRemote(j.clients, state.clients, state.deletes);
+      if (state.scriptVersion >= 2) state.tasks = mergeRemote(j.tasks, state.tasks, state.taskDeletes);
+      // Старый скрипт не хранит этап и ответственного: оставляем те, что стоят в этом браузере
+      state.clients.forEach(function(c){
+        var old = before[c.id];
+        if (!old) return;
+        if (c.stage === undefined) c.stage = old.stage;
+        if (c.owner === undefined) c.owner = old.owner;
       });
-      state.clients = remote.concat(local);
       syncError = '';
       saveState();
       render();
+      if (upgraded) return pushChanges();
     }).catch(function(err){
       syncError = err.message || 'нет соединения';
       renderSyncStatus();
@@ -1182,11 +1833,11 @@
     settingsStatus.textContent = text;
     settingsStatus.className = 'form-status show ' + type;
   }
-  $('settingsBtn').addEventListener('click', function(){
+  function openSettings(){
     $('scriptUrl').value = state.scriptUrl;
     settingsStatus.className = 'form-status';
     settingsDialog.showModal();
-  });
+  }
   $('settingsForm').addEventListener('submit', function(e){
     e.preventDefault();
     var url = $('scriptUrl').value.trim();
@@ -1195,9 +1846,12 @@
       return;
     }
     if (url !== state.scriptUrl) {
-      // В новую таблицу нужно отправить всех, кто уже записан в браузере
+      // В новую таблицу нужно отправить всё, что уже записано в браузере
       state.clients.forEach(markDirty);
+      state.tasks.forEach(markDirty);
       state.deletes = [];
+      state.taskDeletes = [];
+      state.scriptVersion = 1;
     }
     state.scriptUrl = url;
     state.syncOff = false;
@@ -1211,7 +1865,8 @@
   function runSync(){
     showSettingsStatus('success', 'Синхронизация...');
     syncAll().then(function(){
-      showSettingsStatus('success', 'Готово. Клиентов в таблице: ' + state.clients.length + '.');
+      showSettingsStatus('success', 'Готово. В таблице заявок: ' + state.clients.length +
+        (state.scriptVersion >= 2 ? ', задач: ' + state.tasks.length + '.' : '. Задачи, этапы и ответственные появятся там после обновления скрипта.'));
     }).catch(function(err){
       showSettingsStatus('error', 'Не получилось связаться с таблицей: ' + (err.message || 'нет соединения') + '. Проверьте адрес и что доступ к веб-приложению открыт для всех.');
     });
@@ -1222,15 +1877,15 @@
     syncError = '';
     saveState();
     $('scriptUrl').value = '';
-    showSettingsStatus('success', 'Таблица отключена. Клиенты остались в этом браузере.');
+    showSettingsStatus('success', 'Таблица отключена. Данные остались в этом браузере.');
     renderSyncStatus();
   });
 
   // ---------- CSV ----------
   $('exportBtn').addEventListener('click', function(){
-    var head = ['Имя', 'Контакт', 'Ниша', 'Сколько работают', 'О компании', 'Запускали рекламу', 'Сколько тратили', 'Средний чек', 'Ярлыки', 'Напоминание', 'Текст напоминания', 'Добавлен'];
+    var head = ['Имя', 'Этап', 'Ответственный', 'Контакт', 'Ниша', 'Сколько работают', 'О компании', 'Запускали рекламу', 'Сколько тратили', 'Средний чек', 'Ярлыки', 'Напоминание', 'Текст напоминания', 'Добавлен'];
     var lines = [head].concat(visibleClients().map(function(c){
-      return [c.name, c.contact, c.niche, c.years, c.about, c.adsRun, c.adSpend, c.avgCheck, (c.labels || []).join(', '),
+      return [c.name, stageOf(c), c.owner, c.contact, c.niche, c.years, c.about, c.adsRun, c.adSpend, c.avgCheck, (c.labels || []).join(', '),
         (c.remindAt || '').replace('T', ' '), c.remindText, (c.createdAt || '').replace('T', ' ')];
     }));
     var csv = lines.map(function(row){
@@ -1249,19 +1904,31 @@
   // ---------- общее ----------
   document.addEventListener('click', function(e){
     var t = e.target;
-    if (t.getAttribute && t.getAttribute('data-action') === 'new-client') openClient(null);
-    if (t.hasAttribute && t.hasAttribute('data-close')) t.closest('dialog').close();
+    if (!t.getAttribute) return;
+    var action = t.getAttribute('data-action');
+    if (action === 'new-client') openClient(null);
+    if (action === 'new-task') openTask(null);
+    if (action === 'settings') openSettings();
+    if (t.hasAttribute('data-close')) t.closest('dialog').close();
+    var mode = t.getAttribute('data-mode');
+    if (mode) {
+      state.salesMode = mode;
+      saveState();
+      renderSales();
+    }
   });
-  $('search').addEventListener('input', renderTable);
+  $('search').addEventListener('input', renderSales);
+  $('taskSearch').addEventListener('input', renderTasks);
 
+  setView(location.hash.slice(1));
   render();
   checkReminders();
   setInterval(checkReminders, 30000);
 
   // Автосинхронизация: при открытии, при возврате на вкладку и раз в минуту.
-  // Пока открыта карточка клиента, таблицу не перечитываем, чтобы не сбить ввод.
+  // Пока открыта карточка или тащат карточку, таблицу не перечитываем, чтобы не сбить ввод.
   function autoSync(){
-    if (!state.scriptUrl || document.hidden || clientDialog.open) return;
+    if (!state.scriptUrl || document.hidden || clientDialog.open || taskDialog.open || drag) return;
     syncAll().catch(function(){});
   }
   autoSync();
