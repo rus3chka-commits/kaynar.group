@@ -1014,7 +1014,8 @@
       scriptUrl: s.syncOff ? '' : (s.scriptUrl || DEFAULT_SCRIPT_URL),
       // Версия скрипта в таблице: первая умеет только клиентов, вторая — ещё этапы
       // и задачи, третья — ещё ответственного за заявку
-      scriptVersion: s.scriptVersion || 1
+      scriptVersion: s.scriptVersion || 1,
+      migrate: !!s.migrate
     };
   }
   function saveState(){
@@ -1735,12 +1736,12 @@
   }
   // Запоминает версию скрипта. Возвращает true, если скрипт только что обновили
   // и теперь нужно отправить то, что старая версия не принимала.
+  // Запоминает версию скрипта. Возвращает true, если скрипт только что обновили:
+  // тогда нужно отправить то, что старая версия не принимала (задачи, этапы, ответственных).
   function noteVersion(j){
     var v = j.version || 1;
     var upgraded = v > state.scriptVersion;
-    if (upgraded) {
-      state.clients.forEach(function(c){ if (stageOf(c) !== STAGES[0] || c.owner) markDirty(c); });
-    }
+    if (upgraded) state.migrate = true;
     state.scriptVersion = v;
     return upgraded;
   }
@@ -1809,17 +1810,23 @@
       state.clients.forEach(function(c){ before[c.id] = c; });
       state.clients = mergeRemote(j.clients, state.clients, state.deletes);
       if (state.scriptVersion >= 2) state.tasks = mergeRemote(j.tasks, state.tasks, state.taskDeletes);
-      // Старый скрипт не хранит этап и ответственного: оставляем те, что стоят в этом браузере
+      // Старый скрипт не хранит этап и ответственного: оставляем те, что стоят в этом браузере.
+      // Первая синхронизация после обновления скрипта: переносим их в таблицу, но только
+      // если там пусто — то, что уже успел записать коллега, не перетираем.
+      var fill = state.migrate && state.scriptVersion >= 3;
       state.clients.forEach(function(c){
         var old = before[c.id];
         if (!old) return;
-        if (c.stage === undefined) c.stage = old.stage;
-        if (c.owner === undefined) c.owner = old.owner;
+        ['stage', 'owner'].forEach(function(k){
+          if (c[k] === undefined) c[k] = old[k];
+          else if (fill && !c[k] && old[k]) { c[k] = old[k]; markDirty(c); }
+        });
       });
+      if (fill) state.migrate = false;
       syncError = '';
       saveState();
       render();
-      if (upgraded) return pushChanges();
+      if (upgraded || fill) return pushChanges();
     }).catch(function(err){
       syncError = err.message || 'нет соединения';
       renderSyncStatus();
