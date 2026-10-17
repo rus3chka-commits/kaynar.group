@@ -568,6 +568,24 @@
   .toast .t-title{ font-weight: 700; color: var(--gold); font-size: 14px; }
   .toast .t-text{ font-size: 14px; color: var(--white); }
 
+  /* вход по паролю */
+  .lock-screen{ padding-bottom: 120px; }
+  .lock-screen p{ max-width: 520px; margin: 0 auto 32px; }
+  .lock-form{ display:flex; gap: 12px; max-width: 460px; margin: 0 auto; }
+  .lock-form input{
+    flex: 1 1 auto;
+    min-width: 0;
+    background: var(--bg-panel-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--white);
+    font-family: 'Raleway', sans-serif;
+    font-size: 15px;
+    padding: 14px 16px;
+  }
+  .lock-form input:focus{ outline:none; border-color: var(--gold); }
+  .lock-error{ color: var(--danger); font-size: 14px; margin-top: 14px; min-height: 22px; }
+
   /* footer */
   footer{
     padding: 40px 0;
@@ -615,6 +633,19 @@
 
 <!-- ================= ПРОДАЖИ ================= -->
 <main id="view-sales">
+  <section class="hero lock-screen" id="salesLock" hidden>
+    <div class="container">
+      <div class="eyebrow">Продажи</div>
+      <h1>Нужен пароль</h1>
+      <p>Заявки и клиенты доступны только отделу продаж. Введите пароль отдела.</p>
+      <form class="lock-form" data-lock="sales" novalidate>
+        <input type="password" name="password" placeholder="Пароль" aria-label="Пароль" autocomplete="current-password">
+        <button type="submit" class="btn">Войти</button>
+      </form>
+      <div class="lock-error" role="alert"></div>
+    </div>
+  </section>
+  <div id="salesContent">
   <section class="hero">
     <div class="container">
       <div class="eyebrow">Продажи</div>
@@ -679,6 +710,7 @@
         <div class="sync-status"></div>
         <button type="button" class="btn btn-outline btn-sm" id="exportBtn">Скачать CSV</button>
         <button type="button" class="btn btn-outline btn-sm" data-action="settings">Google Таблица</button>
+        <button type="button" class="btn btn-outline btn-sm" data-action="logout" hidden>Выйти</button>
       </div>
     </div>
   </section>
@@ -690,10 +722,24 @@
       <div class="reminder-list" id="reminderList"></div>
     </div>
   </section>
+  </div>
 </main>
 
 <!-- ================= ДЕЛА ================= -->
 <main id="view-tasks" hidden>
+  <section class="hero lock-screen" id="tasksLock" hidden>
+    <div class="container">
+      <div class="eyebrow">Дела</div>
+      <h1>Нужен пароль</h1>
+      <p>Задачи команды доступны по паролю.</p>
+      <form class="lock-form" data-lock="tasks" novalidate>
+        <input type="password" name="password" placeholder="Пароль" aria-label="Пароль" autocomplete="current-password">
+        <button type="submit" class="btn">Войти</button>
+      </form>
+      <div class="lock-error" role="alert"></div>
+    </div>
+  </section>
+  <div id="tasksContent">
   <section class="hero">
     <div class="container">
       <div class="eyebrow">Дела</div>
@@ -728,9 +774,11 @@
       <div class="tools-row">
         <div class="sync-status"></div>
         <button type="button" class="btn btn-outline btn-sm" data-action="settings">Google Таблица</button>
+        <button type="button" class="btn btn-outline btn-sm" data-action="logout" hidden>Выйти</button>
       </div>
     </div>
   </section>
+  </div>
 </main>
 
 <footer>
@@ -1026,7 +1074,10 @@
       // Версия скрипта в таблице: первая умеет только клиентов, вторая — ещё этапы
       // и задачи, третья — ещё ответственного за заявку
       scriptVersion: s.scriptVersion || 1,
-      migrate: !!s.migrate
+      migrate: !!s.migrate,
+      // Пароль проверяет скрипт в таблице; без него заявки и задачи он не отдаёт
+      password: s.password || '',
+      access: s.access || { sales: true, tasks: true }
     };
   }
   function saveState(){
@@ -1199,6 +1250,7 @@
   function render(){
     // Пока карточку тащат, доску не перерисовываем
     if (drag) { renderPending = true; return; }
+    renderLocks();
     renderStats();
     renderFilters();
     renderSales();
@@ -1450,12 +1502,54 @@
     });
   }
 
+  function renderLocks(){
+    var a = access();
+    $('salesLock').hidden = a.sales;
+    $('salesContent').hidden = !a.sales;
+    $('tasksLock').hidden = a.tasks;
+    $('tasksContent').hidden = !a.tasks;
+    $('headerAdd').hidden = view === 'tasks' ? !a.tasks : !a.sales;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-action="logout"]'), function(b){ b.hidden = !state.password; });
+  }
+
+  // Вход: пароль сохраняется в этом браузере, проверяет его скрипт в таблице
+  Array.prototype.forEach.call(document.querySelectorAll('.lock-form'), function(form){
+    var error = form.parentNode.querySelector('.lock-error');
+    var section = form.getAttribute('data-lock');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var value = form.elements.password.value.trim();
+      if (!value) { error.textContent = 'Введите пароль.'; return; }
+      var button = form.querySelector('button');
+      button.disabled = true;
+      error.textContent = '';
+      state.password = value;
+      saveState();
+      syncAll().then(function(){
+        form.elements.password.value = '';
+        if (!access()[section]) error.textContent = 'Неверный пароль.';
+      }).catch(function(err){
+        error.textContent = 'Нет связи с таблицей: ' + (err.message || 'нет соединения') + '. Попробуйте ещё раз.';
+      }).then(function(){ button.disabled = false; });
+    });
+  });
+
+  function logout(){
+    // Сначала отправляем несохранённое, потом забываем пароль
+    pushChanges().then(function(){
+      state.password = '';
+      saveState();
+      return syncAll();
+    }).catch(function(){}).then(render);
+  }
+
   // ---------- разделы ----------
   function setView(next){
     view = next === 'tasks' ? 'tasks' : 'sales';
     $('view-sales').hidden = view !== 'sales';
     $('view-tasks').hidden = view !== 'tasks';
     $('headerAdd').textContent = view === 'tasks' ? 'Добавить задачу' : 'Добавить заявку';
+    renderLocks();
     Array.prototype.forEach.call(document.querySelectorAll('[data-nav]'), function(a){
       var on = a.getAttribute('data-nav') === view;
       a.classList.toggle('active', on);
@@ -1647,7 +1741,9 @@
       checkRadio(taskForm, 'status', statusOf(t));
     }
     var linked = t ? t.clientId : clientId;
-    select.value = linked && findClient(linked) ? linked : '';
+    // Клиента нет в списке (раздел продаж закрыт паролем): связь с ним не теряем
+    if (t && linked && !findClient(linked)) select.appendChild(el('option', { value: linked, text: t.clientName || 'Клиент' }));
+    select.value = linked || '';
     if (!t && person) people.value = person;
     taskDialog.showModal();
     taskDialog.scrollTop = 0;
@@ -1669,7 +1765,7 @@
     t.status = taskForm.elements.status.value;
     t.clientId = $('taskClient').value;
     // Имя клиента дублируем, чтобы в Google Таблице задача читалась без CRM
-    t.clientName = t.clientId ? findClient(t.clientId).name : '';
+    t.clientName = t.clientId ? (findClient(t.clientId) ? findClient(t.clientId).name : t.clientName) : '';
     taskDialog.close();
     touch(t);
   });
@@ -1737,6 +1833,7 @@
   // ---------- Google Таблица ----------
   function api(payload){
     payload.schema = SCHEMA;
+    payload.password = state.password;
     return fetch(state.scriptUrl, { method: 'POST', body: JSON.stringify(payload) })
       .then(function(r){ return r.json(); })
       .then(function(j){
@@ -1760,9 +1857,20 @@
   function noteVersion(j){
     var v = j.version || 1;
     var upgraded = v > state.scriptVersion;
-    if (upgraded) state.migrate = true;
+    if (v >= 4 && state.scriptVersion < 4) state.migrate = true;
     state.scriptVersion = v;
     return upgraded;
+  }
+
+  // Что разрешил скрипт по паролю. К закрытому разделу данные в браузере не храним.
+  function applyAccess(j){
+    var a = j.access || { sales: true, tasks: true };
+    state.access = { sales: !!a.sales, tasks: !!a.tasks };
+    if (!a.sales) { state.clients = []; state.deletes = []; state.notified = {}; }
+    if (!a.tasks) { state.tasks = []; state.taskDeletes = []; }
+  }
+  function access(){
+    return state.scriptUrl ? state.access : { sales: true, tasks: true };
   }
 
   var syncing = null;
@@ -1771,10 +1879,11 @@
     if (!state.scriptUrl) return Promise.resolve();
     if (syncing) return syncing.then(pushChanges);
     var v2 = state.scriptVersion >= 2;
-    var clients = dirtyOf(state.clients);
-    var tasks = v2 ? dirtyOf(state.tasks) : [];
-    var deletes = state.deletes.slice();
-    var taskDeletes = v2 ? state.taskDeletes.slice() : [];
+    var canSales = state.access.sales, canTasks = v2 && state.access.tasks;
+    var clients = canSales ? dirtyOf(state.clients) : [];
+    var tasks = canTasks ? dirtyOf(state.tasks) : [];
+    var deletes = canSales ? state.deletes.slice() : [];
+    var taskDeletes = canTasks ? state.taskDeletes.slice() : [];
     if (!clients.length && !tasks.length && !deletes.length && !taskDeletes.length) return Promise.resolve();
     var sentClients = clients.map(function(c){ return c._dirty; });
     var sentTasks = tasks.map(function(t){ return t._dirty; });
@@ -1791,6 +1900,7 @@
         state.deletes = state.deletes.filter(function(id){ return deletes.indexOf(id) === -1; });
         state.taskDeletes = state.taskDeletes.filter(function(id){ return taskDeletes.indexOf(id) === -1; });
         again = noteVersion(j);
+        applyAccess(j);
         syncError = '';
       })
       .catch(function(err){ syncError = err.message || 'нет соединения'; })
@@ -1825,6 +1935,7 @@
       // Пока таблица читалась, ушла новая правка: этот список уже устарел
       if (seen !== pushCount) return;
       var upgraded = noteVersion(j);
+      applyAccess(j);
       var before = {};
       state.clients.forEach(function(c){ before[c.id] = c; });
       state.clients = mergeRemote(j.clients, state.clients, state.deletes);
@@ -1935,6 +2046,7 @@
     if (action === 'new-client') openClient(null);
     if (action === 'new-task') openTask(null);
     if (action === 'settings') openSettings();
+    if (action === 'logout') logout();
     if (t.hasAttribute('data-close')) t.closest('dialog').close();
     var mode = t.getAttribute('data-mode');
     if (mode) {
