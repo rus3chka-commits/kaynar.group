@@ -381,7 +381,7 @@
     border-radius: 6px;
     background: var(--bg-panel-2);
   }
-  table{ width:100%; min-width: 1180px; border-collapse: collapse; }
+  table{ width:100%; min-width: 1300px; border-collapse: collapse; }
   th, td{ text-align:left; padding: 14px 16px; vertical-align: top; }
   th{
     font-size: 12px;
@@ -658,6 +658,7 @@
                 <th>Имя</th>
                 <th>Этап</th>
                 <th>Ответственный</th>
+                <th>Передана</th>
                 <th>Ниша</th>
                 <th>Работают</th>
                 <th>О компании</th>
@@ -805,6 +806,7 @@
       <div class="field">
         <label for="owner">Ответственный</label>
         <select id="owner" name="owner"></select>
+        <div class="hint" id="assignedHint" hidden></div>
       </div>
     </div>
 
@@ -979,6 +981,15 @@
   var MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
   var FIELDS = ['name', 'contact', 'niche', 'years', 'about', 'adSpend', 'avgCheck', 'owner', 'remindAt', 'remindText'];
   var TASK_FIELDS = ['title', 'description', 'assignee', 'due'];
+  // Дополнительные колонки таблицы: скрипт (версия 4 и новее) сам добавит их на лист.
+  // Новое поле добавляется сюда — переразвёртывать скрипт для этого не нужно.
+  // [ключ, заголовок колонки, 'date' — если это дата]
+  var SCHEMA = {
+    clients: [['assignedAt', 'Передана менеджеру', 'date']],
+    tasks: []
+  };
+  // Поля, которые старые версии скрипта не хранили: пока скрипт не обновлён, они живут в браузере
+  var LATE_FIELDS = ['stage', 'owner', 'assignedAt'];
 
   // Номер правки: по нему видно, менялась ли запись, пока шла отправка
   var dirtySeq = Date.now();
@@ -1285,7 +1296,7 @@
         c.niche ? el('div', { 'class': 'sub', text: c.niche + (c.years ? ' · ' + c.years : '') }) : null,
         c.avgCheck ? el('div', { 'class': 'sub', text: 'Средний чек: ' + c.avgCheck }) : null,
         c.contact ? el('div', { 'class': 'sub', text: c.contact }) : null,
-        c.owner ? el('div', { 'class': 'sub', text: 'Ответственный: ' + c.owner }) : null,
+        c.owner ? el('div', { 'class': 'sub', text: 'Ответственный: ' + c.owner + (c.assignedAt ? ' · передана ' + formatWhen(c.assignedAt).toLowerCase() : '') }) : null,
         s ? el('div', { 'class': 'when ' + s, text: formatWhen(c.remindAt) + ' · ' + (c.remindText || 'Перезвонить') }) : null,
         (c.labels || []).length ? el('div', { 'class': 'tags' }, c.labels.map(function(l){ return tagEl(l); })) : null
       ], function(){ openClient(c.id); });
@@ -1330,6 +1341,7 @@
         ]),
         el('td', { 'class': 'nowrap', text: stageOf(c), style: 'color:' + COLUMN_COLORS[STAGES.indexOf(stageOf(c))] + ';font-weight:600;' }),
         el('td', { 'class': 'nowrap', text: c.owner || '—' }),
+        el('td', { 'class': 'nowrap', text: c.owner && c.assignedAt ? formatWhen(c.assignedAt) : '—' }),
         el('td', { text: c.niche || '—' }),
         el('td', { text: c.years || '—' }),
         el('td', null, [ el('div', { 'class': 'about', text: c.about || '—', title: c.about || '' }) ]),
@@ -1423,10 +1435,11 @@
       text = 'Google Таблица недоступна: ' + syncError + '. Не отправлено изменений: ' + pending + '. Они сохранены в браузере и уйдут при следующей синхронизации.';
     } else if (pending) {
       text = 'Отправка в Google Таблицу...';
-    } else if (state.scriptVersion < 3) {
+    } else if (state.scriptVersion < 4) {
+      var missing = (v2 ? [] : ['этапы воронки', 'задачи']).concat(state.scriptVersion < 3 ? ['ответственные'] : [], ['время передачи менеджеру']);
       cls += ' warn';
-      text = 'Заявки записываются в Google Таблицу, но ' + (v2 ? 'ответственные за заявки' : 'этапы воронки, ответственные и задачи') +
-        ' пока хранятся только в этом браузере. Чтобы их видели все, обновите скрипт в таблице: инструкция в начале файла google-apps-script.js.';
+      text = 'Заявки записываются в Google Таблицу, но ' + missing.join(', ') +
+        (missing.length > 1 ? ' пока хранятся' : ' пока хранится') + ' только в этом браузере. Чтобы их видели все, обновите скрипт в таблице: инструкция в начале файла google-apps-script.js.';
     } else {
       cls += ' ok';
       text = 'Все изменения записаны в Google Таблицу.';
@@ -1484,6 +1497,8 @@
     $('clientDialogTitle').textContent = c ? c.name : 'Новая заявка';
     $('deleteBtn').hidden = !c;
     fillPeople($('owner'), c ? c.owner : '');
+    $('assignedHint').hidden = !(c && c.owner && c.assignedAt);
+    if (c && c.owner && c.assignedAt) $('assignedHint').textContent = 'Передана: ' + formatWhen(c.assignedAt);
     if (c) {
       FIELDS.forEach(function(f){ clientForm.elements[f].value = c[f] || ''; });
       checkRadio(clientForm, 'adsRun', c.adsRun || '');
@@ -1569,7 +1584,10 @@
       c = { id: newId(), createdAt: toLocalInput(new Date()) };
       state.clients.push(c);
     }
+    var prevOwner = c.owner || '';
     FIELDS.forEach(function(f){ c[f] = clientForm.elements[f].value.trim(); });
+    // Когда заявку передали менеджеру: ставится при выборе или смене ответственного
+    if (c.owner !== prevOwner) c.assignedAt = c.owner ? toLocalInput(new Date()) : '';
     c.adsRun = clientForm.elements.adsRun.value;
     c.stage = clientForm.elements.stage.value;
     if (c.adsRun === 'Нет') c.adSpend = '';
@@ -1718,6 +1736,7 @@
 
   // ---------- Google Таблица ----------
   function api(payload){
+    payload.schema = SCHEMA;
     return fetch(state.scriptUrl, { method: 'POST', body: JSON.stringify(payload) })
       .then(function(r){ return r.json(); })
       .then(function(j){
@@ -1813,11 +1832,11 @@
       // Старый скрипт не хранит этап и ответственного: оставляем те, что стоят в этом браузере.
       // Первая синхронизация после обновления скрипта: переносим их в таблицу, но только
       // если там пусто — то, что уже успел записать коллега, не перетираем.
-      var fill = state.migrate && state.scriptVersion >= 3;
+      var fill = state.migrate && state.scriptVersion >= 4;
       state.clients.forEach(function(c){
         var old = before[c.id];
         if (!old) return;
-        ['stage', 'owner'].forEach(function(k){
+        LATE_FIELDS.forEach(function(k){
           if (c[k] === undefined) c[k] = old[k];
           else if (fill && !c[k] && old[k]) { c[k] = old[k]; markDirty(c); }
         });
@@ -1890,9 +1909,9 @@
 
   // ---------- CSV ----------
   $('exportBtn').addEventListener('click', function(){
-    var head = ['Имя', 'Этап', 'Ответственный', 'Контакт', 'Ниша', 'Сколько работают', 'О компании', 'Запускали рекламу', 'Сколько тратили', 'Средний чек', 'Ярлыки', 'Напоминание', 'Текст напоминания', 'Добавлен'];
+    var head = ['Имя', 'Этап', 'Ответственный', 'Передана менеджеру', 'Контакт', 'Ниша', 'Сколько работают', 'О компании', 'Запускали рекламу', 'Сколько тратили', 'Средний чек', 'Ярлыки', 'Напоминание', 'Текст напоминания', 'Добавлен'];
     var lines = [head].concat(visibleClients().map(function(c){
-      return [c.name, stageOf(c), c.owner, c.contact, c.niche, c.years, c.about, c.adsRun, c.adSpend, c.avgCheck, (c.labels || []).join(', '),
+      return [c.name, stageOf(c), c.owner, (c.assignedAt || '').replace('T', ' '), c.contact, c.niche, c.years, c.about, c.adsRun, c.adSpend, c.avgCheck, (c.labels || []).join(', '),
         (c.remindAt || '').replace('T', ' '), c.remindText, (c.createdAt || '').replace('T', ' ')];
     }));
     var csv = lines.map(function(row){
